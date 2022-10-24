@@ -1,0 +1,3 @@
+#/bin/sh
+
+curl --silent --location https://api.github.com/repos/verifast/verifast/releases | grep tag_name | cut -d ":" -f 2 | tr -d "\"\,"

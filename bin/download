@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# This asdf shell script downloads the correct version of Verifast
+
+# NOTE: at the moment this ONLY works on Linux using an Intel processor.
+
+# The following is modeled upon the ConTeXt install.sh script.
+
+trap 'rm -rf "$ASDF_CONTEXT_TMPDIR"' EXIT
+
+echo "ASDF_DOWNLOAD_PATH: $ASDF_DOWNLOAD_PATH"
+
+SYSTEM=$(uname -s)
+CPU=$(uname -m)
+PLATFORM="unknown"
+
+case "$SYSTEM" in
+  Linux)
+    if command -v ldd >/dev/null && ldd --version 2>&1 | grep -E '^musl' >/dev/null
+    then
+      exit 1
+    else
+      PLATFORM="linux"
+    fi
+    ;;
+  *)
+    exit 1
+esac
+
+case "$CPU" in
+  x86_64|ia64)
+    ;;
+  *)
+    exit 1
+esac
+
+cd $ASDF_DOWNLOAD_PATH
+
+echo "Platform: $PLATFORM"
+
+curl --silent \
+  https://github.com/verifast/verifast/releases/expanded_assets/nightly \
+  | grep linux | grep href | tr ' ' '\n' | grep href | tr '=' '\n' \
+  | grep -v href | tr -d '"'
+
+wget https://github.com/verifast/verifast/releases/expanded_assets/nightly
+exit 1
+#wget https://-$PLATFORM.tar.gz \
+#  -O verifast.tar.gz
+
+if test $? -ne 0
+then
+  rm context.zip
+  exit 1
+else
+  unzip context.zip
+  rm context.zip
+fi

@@ -4,8 +4,6 @@
 
 # NOTE: at the moment this ONLY works on Linux using an Intel processor.
 
-# The following is modeled upon the ConTeXt install.sh script.
-
 trap 'rm -rf "$ASDF_CONTEXT_TMPDIR"' EXIT
 
 echo "ASDF_DOWNLOAD_PATH: $ASDF_DOWNLOAD_PATH"
@@ -38,21 +36,22 @@ cd $ASDF_DOWNLOAD_PATH
 
 echo "Platform: $PLATFORM"
 
-curl --silent \
+verifastURL=https://github.com$(curl --silent \
   https://github.com/verifast/verifast/releases/expanded_assets/nightly \
-  | grep linux | grep href | tr ' ' '\n' | grep href | tr '=' '\n' \
-  | grep -v href | tr -d '"'
+  | grep $PLATFORM | grep href | tr ' ' '\n' | grep href | tr '=' '\n' \
+  | grep -v href | tr -d '"')
 
-wget https://github.com/verifast/verifast/releases/expanded_assets/nightly
-exit 1
-#wget https://-$PLATFORM.tar.gz \
-#  -O verifast.tar.gz
+verifastFile=$(basename $verifastURL)
+
+echo Downloading: $verifastURL
+
+curl -o verifast.tar.gz -L $verifastURL
 
 if test $? -ne 0
 then
-  rm context.zip
+  rm verifast.tar.gz
   exit 1
 else
-  unzip context.zip
-  rm context.zip
+  tar -x -v --strip-components=1 -f verifast.tar.gz
+  rm verifast.tar.gz
 fi
